@@ -5,6 +5,8 @@
 #include <unistd.h>
 #include <signal.h>
 
+// author: fauzy madani
+// this is a test repository for email based workflow
 void list_processes() {
     struct dirent *entry;
     DIR *proc_dir = opendir("/proc");
