@@ -1,7 +1,7 @@
 From eb0c53d6038f5dcba168ae4f64470b414151b7f9 Mon Sep 17 00:00:00 2001
 From: fauzymadani <keperluansekolahfauzy@gmail.com>
 Date: Mon, 2 Dec 2024 12:41:28 +0700
-Subject: [PATCH] add patch
+Subject: [PATCH 1/2] add patch
 
 ---
  0001-initial-commit.patch | 94 +++++++++++++++++++++++++++++++++++++++
