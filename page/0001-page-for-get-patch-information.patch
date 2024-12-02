@@ -1,0 +1,171 @@
+From f774f709ed5dd05de268bb244a964e1c5da74d61 Mon Sep 17 00:00:00 2001
+From: fauzymadani <keperluansekolahfauzy@gmail.com>
+Date: Mon, 2 Dec 2024 13:17:16 +0700
+Subject: [PATCH] page for get patch information
+
+---
+ page/index.php        | 49 ++++++++++++++++++++++++++++++++++
+ page/patch_viewer.php | 61 +++++++++++++++++++++++++++++++++++++++++++
+ page/style.css        | 26 ++++++++++++++++++
+ 3 files changed, 136 insertions(+)
+ create mode 100644 page/index.php
+ create mode 100644 page/patch_viewer.php
+ create mode 100644 page/style.css
+
+diff --git a/page/index.php b/page/index.php
+new file mode 100644
+index 0000000..d239fd1
+--- /dev/null
++++ b/page/index.php
+@@ -0,0 +1,49 @@
++<?php
++// GitHub Repository
++$repoOwner = 'fauzymadani';  // Ganti dengan username pemilik repo
++$repoName = 'TestPatch';      // Ganti dengan nama repository
++
++// URL API GitHub untuk mengambil commit dari repository
++$apiUrl = "https://api.github.com/repos/$repoOwner/$repoName/commits";
++
++// Mengambil data dari API GitHub menggunakan file_get_contents
++$options = [
++    "http" => [
++        "header" => "User-Agent: PHP"
++    ]
++];
++$context = stream_context_create($options);
++$response = file_get_contents($apiUrl, false, $context);
++$commits = json_decode($response, true);
++
++if ($commits === null) {
++    echo "Tidak bisa mengambil data commit dari GitHub.";
++    exit;
++}
++
++?>
++
++<!DOCTYPE html>
++<html lang="en">
++<head>
++    <meta charset="UTF-8">
++    <meta name="viewport" content="width=device-width, initial-scale=1.0">
++    <title>Git Patch Viewer</title>
++    <link rel="stylesheet" href="style.css">
++</head>
++<body>
++    <h1>Git Patch Viewer - <?php echo "$repoOwner/$repoName"; ?></h1>
++    
++    <h2>Daftar Commit</h2>
++    <ul>
++        <?php foreach ($commits as $commit) : ?>
++            <li>
++                <a href="patch_viewer.php?sha=<?php echo $commit['sha']; ?>"><?php echo $commit['commit']['message']; ?></a> 
++                - <?php echo $commit['commit']['author']['name']; ?> 
++                (<?php echo $commit['commit']['author']['date']; ?>)
++            </li>
++        <?php endforeach; ?>
++    </ul>
++</body>
++</html>
++
+diff --git a/page/patch_viewer.php b/page/patch_viewer.php
+new file mode 100644
+index 0000000..b858a1b
+--- /dev/null
++++ b/page/patch_viewer.php
+@@ -0,0 +1,61 @@
++<?php
++if (!isset($_GET['sha'])) {
++    echo "Commit SHA tidak ditemukan.";
++    exit;
++}
++
++$sha = $_GET['sha'];  // Commit SHA yang dipilih
++
++// GitHub Repository
++$repoOwner = 'fauzymadani';  // Ganti dengan username pemilik repo
++$repoName = 'TestPatch';      // Ganti dengan nama repository
++
++// URL API GitHub untuk mengambil detail commit berdasarkan SHA
++$apiUrl = "https://api.github.com/repos/$repoOwner/$repoName/commits/$sha";
++
++// Mengambil data dari API GitHub menggunakan file_get_contents
++$options = [
++    "http" => [
++        "header" => "User-Agent: PHP"
++    ]
++];
++$context = stream_context_create($options);
++$response = file_get_contents($apiUrl, false, $context);
++$commitDetails = json_decode($response, true);
++
++if ($commitDetails === null) {
++    echo "Tidak bisa mengambil data commit dari GitHub.";
++    exit;
++}
++
++$commitMessage = $commitDetails['commit']['message'];
++$commitDate = $commitDetails['commit']['author']['date'];
++$commitAuthor = $commitDetails['commit']['author']['name'];
++
++// Mendapatkan patch/diff dari commit
++$patchUrl = "https://github.com/$repoOwner/$repoName/commit/$sha.diff";
++$patchContent = file_get_contents($patchUrl);
++
++?>
++
++<!DOCTYPE html>
++<html lang="en">
++<head>
++    <meta charset="UTF-8">
++    <meta name="viewport" content="width=device-width, initial-scale=1.0">
++    <title>Patch Detail</title>
++    <link rel="stylesheet" href="style.css">
++</head>
++<body>
++    <h1>Patch Detail</h1>
++    
++    <h2><?php echo $commitMessage; ?></h2>
++    <p>By: <?php echo $commitAuthor; ?> on <?php echo $commitDate; ?></p>
++    
++    <h3>Patch</h3>
++    <pre><?php echo htmlspecialchars($patchContent); ?></pre>
++
++    <a href="index.php">Kembali ke Daftar Commit</a>
++</body>
++</html>
++
+diff --git a/page/style.css b/page/style.css
+new file mode 100644
+index 0000000..8b334bb
+--- /dev/null
++++ b/page/style.css
+@@ -0,0 +1,26 @@
++body {
++    font-family: Arial, sans-serif;
++    margin: 20px;
++}
++
++h1, h2 {
++    color: #333;
++}
++
++a {
++    color: #007BFF;
++    text-decoration: none;
++}
++
++a:hover {
++    text-decoration: underline;
++}
++
++pre {
++    background-color: #f4f4f4;
++    padding: 10px;
++    border-radius: 5px;
++    white-space: pre-wrap;
++    word-wrap: break-word;
++}
++
+-- 
+2.34.1
+
